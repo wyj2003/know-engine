@@ -1,0 +1,32 @@
+# IDE and generated files
+/.idea/
+*.iml
+/target/
+/output/
+/tmp/
+__pycache__/
+*.py[cod]
+*.log
+
+# Local credentials and data
+/.env
+/.env.*
+/config/local.*
+!/config/local.example.properties
+/src/main/resources/sql/know_engine.sql
+
+# Model artifacts supplied by scripts/fetch-reranker.ps1
+/src/main/resources/model/bge-reranker-model/
+
+# Local study material and archived acceptance results
+/学习材料/
+/学习总结汇总/
+/全功能验收报告.md
+/全功能验收结果.json
+/运行学习记录.md
+/运行验证结果.json
+/scripts/audit-scanned-pdf.py
+/scripts/build-acceptance-report.py
+/scripts/functional-audit.py
+/scripts/prepare-audit-assets.py
+*.zip

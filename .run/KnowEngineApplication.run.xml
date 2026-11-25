@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="KnowEngineApplication-local" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="know.engine.KnowEngineApplication" />
+    <module name="know-engine" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <option name="PASS_PARENT_ENVS" value="true" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

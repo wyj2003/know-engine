@@ -1,0 +1,110 @@
+server:
+  address: 127.0.0.1
+  port: 8009
+
+spring:
+  config:
+    import: optional:file:./config/local.properties
+  application:
+    name: KnowEngine
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB
+      max-request-size: 100MB
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://127.0.0.1:3306/know_engine_learning?rewriteBatchedStatements=true
+    username: ${KNOW_ENGINE_MYSQL_USERNAME:know_engine}
+    password: ${KNOW_ENGINE_MYSQL_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # druid:
+    initial-size: 5
+    min-idle: 5
+    max-active: 20
+    max-wait: 60000
+    time-between-eviction-runs-millis: 60000
+    min-evictable-idle-time-millis: 300000
+    validation-query: SELECT 1
+    test-while-idle: true
+    test-on-borrow: false
+    test-on-return: false
+    pool-prepared-statements: true
+    max-pool-prepared-statement-per-connection-size: 20
+    filters: stat,wall
+    connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+    stat-view-servlet:
+      enabled: false
+      url-pattern: /druid/*
+      login-username: ${KNOW_ENGINE_DRUID_USERNAME:}
+      login-password: ${KNOW_ENGINE_DRUID_PASSWORD:}
+  data:
+    redis:
+      host: ${KNOW_ENGINE_REDIS_HOST:127.0.0.1}
+      port: ${KNOW_ENGINE_REDIS_PORT:6379}
+      password: ${KNOW_ENGINE_REDIS_PASSWORD:}
+      ssl:
+        enabled: false
+
+# MyBatis-Plus
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath*:/mapper/**/*.xml
+
+# DeepSeek：聊天、意图识别、问题改写、标题及回答生成
+deepseek:
+  api-key: ${DEEPSEEK_API_KEY}
+  base-url: https://api.deepseek.com
+  model-name: deepseek-flash
+
+# Embedding 向量模型使用独立配置，不与 DeepSeek 共用 API Key
+dashscope:
+  api-key: ${DASHSCOPE_API_KEY:}
+
+langchain4j:
+  open-ai:
+    chat-model:
+      api-key: ${deepseek.api-key}
+      model-name: ${deepseek.model-name}
+      base-url: ${deepseek.base-url}
+      custom-parameters:
+        thinking:
+          type: disabled
+      log-requests: false
+      log-responses: false
+    streaming-chat-model:
+      api-key: ${deepseek.api-key}
+      model-name: ${deepseek.model-name}
+      base-url: ${deepseek.base-url}
+      custom-parameters:
+        thinking:
+          type: disabled
+      log-requests: false
+      log-responses: false
+
+elasticsearch:
+  host: http://127.0.0.1:9200
+  embedding-provider: local
+  base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+  model-name: text-embedding-v4
+  api-key: ${dashscope.api-key}
+  dimensions: 512
+
+# MinIO 两个端口不要混用：
+#   --address          S3 API 端口，Java SDK / 预签名 URL 必须走这个
+#   --console-address  控制台 Web UI，只能浏览器打开，不能给 MinioClient 用
+# 启动命令：.\minio.exe server "D:\soft\minio\data" --address "127.0.0.1:9090" --console-address "127.0.0.1:9000"
+# http://127.0.0.1:9000/browser 可访问Web控制台
+minio:
+  url: http://127.0.0.1:9090
+  accessKey: ${KNOW_ENGINE_MINIO_ACCESS_KEY:}
+  secretKey: ${KNOW_ENGINE_MINIO_SECRET_KEY:}
+  bucketName: know-engine # 默认是这个,可以不改
+  endpoint: http://127.0.0.1:9090 # 必须指向 --address（S3 API），不是控制台端口
+
+# 文件解析服务配置
+file:
+  parse:
+    api:
+      url: http://localhost:8000 # 文档解析接口地址，记得改成你自己的

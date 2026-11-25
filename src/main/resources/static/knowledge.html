@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知识工作台 · KnowEngine</title>
+    <link rel="stylesheet" href="/common.css">
+    <link rel="stylesheet" href="/knowledge.css">
+    <link rel="stylesheet" href="/knowledge-evidence.css">
+    <script type="module" src="/knowledge.js"></script>
+</head>
+<body>
+    <div class="app-page">
+        <header class="app-nav">
+            <div class="app-brand"><span class="brand-mark">KE</span><h1>知识工作台</h1></div>
+            <nav class="app-nav-links" aria-label="页面导航">
+                <a href="/upload.html" class="nav-link">上传文档</a>
+                <a href="/document.html" class="nav-link">文档管理</a>
+                <a href="/chat.html" class="nav-link">AI 对话</a>
+                <a href="/eval-report.html" class="nav-link">RAG 评测</a>
+                <a href="/knowledge.html" class="nav-link is-active" aria-current="page">知识工作台</a>
+            </nav>
+        </header>
+        <main class="app-main workbench">
+            <nav class="workbench-tabs" aria-label="工作台功能">
+                <button data-panel="review" type="button" aria-pressed="true" aria-controls="review">版本试问</button>
+                <button data-panel="table" type="button" aria-pressed="false" aria-controls="table">表格计算</button>
+                <button data-panel="research" type="button" aria-pressed="false" aria-controls="research">跨资料问答</button>
+                <button data-panel="mcp" type="button" aria-pressed="false" aria-controls="mcp">MCP 接入</button>
+            </nav>
+            <p id="workbenchStatus" class="workbench-status" role="status"></p>
+
+            <section class="panel workbench-panel" id="review">
+                <div class="workbench-heading">
+                    <h2>比较两个版本</h2>
+                    <a href="/document.html">管理文档与草稿</a>
+                </div>
+                <form id="reviewForm">
+                    <div class="workbench-fields three">
+                        <label>文档<select id="reviewDocument" required><option value="">加载文档…</option></select></label>
+                        <label>对照版本<select id="baselineVersion" required></select></label>
+                        <label>候选版本<select id="candidateVersion" required></select></label>
+                    </div>
+                    <label class="workbench-question">试问问题
+                        <textarea id="reviewQuestions" rows="3" maxlength="2505" placeholder="每行一个问题，最多五条。留空可只看差异。"></textarea>
+                    </label>
+                    <div class="workbench-actions"><button class="btn btn-primary" type="submit">比较版本</button></div>
+                    <p class="workbench-status" id="reviewStatus" role="status"></p>
+                </form>
+                <div id="reviewResult" class="workbench-result" aria-live="polite"></div>
+            </section>
+
+            <section class="panel workbench-panel" id="table" hidden>
+                <div class="workbench-heading"><h2>查询并计算表格</h2></div>
+                <div class="workbench-fields three">
+                    <label>表格文档<select id="tableDocument" required></select></label>
+                    <label>版本<select id="tableVersion" required></select></label>
+                    <label>工作表<select id="tableSheet"></select></label>
+                </div>
+                <p class="table-summary" id="tableSummary" role="status"></p>
+                <form id="tableQuestionForm">
+                    <label class="workbench-question">用自然语言提问
+                        <input type="text" id="tableQuestion" maxlength="500" required placeholder="库存最低的三种备件分别放在哪？">
+                    </label>
+                    <div class="workbench-actions"><button class="btn btn-primary" type="submit">计算答案</button></div>
+                </form>
+                <details class="table-manual">
+                    <summary>手动设置计算</summary>
+                    <form id="tableManualForm">
+                        <div class="workbench-fields three">
+                            <label>运算<select id="tableOperation">
+                                <option value="ROWS">查看记录</option><option value="TOP_LOWEST">最低值排行</option>
+                                <option value="TOP_HIGHEST">最高值排行</option><option value="COUNT">计数</option>
+                                <option value="SUM">求和</option><option value="AVG">平均值</option>
+                                <option value="MIN">最小值</option><option value="MAX">最大值</option>
+                            </select></label>
+                            <label>数值列<select id="tableColumn" disabled></select></label>
+                            <label>分组列<select id="tableGroup" disabled></select></label>
+                        </div>
+                        <div class="workbench-fields filters">
+                            <label>筛选列<select id="filterColumn"></select></label>
+                            <label>条件<select id="filterOperator">
+                                <option value="EQ">等于</option><option value="CONTAINS">包含</option>
+                                <option value="LT">小于</option><option value="LTE">小于等于</option>
+                                <option value="GT">大于</option><option value="GTE">大于等于</option>
+                            </select></label>
+                            <label>筛选值<input id="filterValue" maxlength="300"></label>
+                            <label>最多显示<input type="number" id="tableLimit" min="1" max="50" value="20" required></label>
+                        </div>
+                        <div class="workbench-actions"><button class="btn btn-secondary" type="submit">运行计算</button></div>
+                    </form>
+                </details>
+                <p class="workbench-status" id="tableStatus" role="status"></p>
+                <div id="tableResult" class="workbench-result" aria-live="polite"></div>
+                <div id="tableSourceRows" class="workbench-result" aria-live="polite"></div>
+            </section>
+
+            <section class="panel workbench-panel" id="research" hidden>
+                <div class="workbench-heading"><h2>用两份资料回答</h2></div>
+                <form id="researchForm">
+                    <div class="workbench-fields two">
+                        <fieldset><legend>查找线索</legend>
+                            <label>第一份文档<select id="firstDocument" required></select></label>
+                            <label>版本<select id="firstVersion" required></select></label>
+                        </fieldset>
+                        <fieldset><legend>查找相关证据</legend>
+                            <label>第二份文档<select id="secondDocument" required></select></label>
+                            <label>版本<select id="secondVersion" required></select></label>
+                        </fieldset>
+                    </div>
+                    <label class="workbench-question">问题
+                        <textarea id="researchQuestion" maxlength="500" rows="3" required placeholder="输入事件编号，询问对应故障的排查步骤。"></textarea>
+                    </label>
+                    <div class="workbench-actions"><button class="btn btn-primary" type="submit">分步查找</button></div>
+                    <p class="workbench-status" id="researchStatus" role="status"></p>
+                </form>
+                <div id="researchResult" class="workbench-result" aria-live="polite"></div>
+            </section>
+
+            <section class="panel workbench-panel" id="mcp" hidden>
+                <div class="workbench-heading"><h2>连接本机 AI 助手</h2></div>
+                <p>在 MCP 客户端选择 Streamable HTTP，填入本机端点。</p>
+                <div class="mcp-endpoint">
+                    <code id="mcpAddress"></code>
+                    <button type="button" class="btn btn-secondary" id="copyMcp">复制地址</button>
+                </div>
+                <dl class="mcp-tools">
+                    <dt><code>search_knowledge</code></dt><dd>按问题搜索证据，返回文档、版本和片段编号。</dd>
+                    <dt><code>get_citation</code></dt><dd>按编号读取引用原文和位置。</dd>
+                    <dt><code>compare_versions</code></dt><dd>比较同一文档的两个版本。</dd>
+                </dl>
+                <p id="mcpStatus" class="workbench-status" role="status"></p>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
